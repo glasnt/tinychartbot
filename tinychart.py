@@ -1,3 +1,6 @@
+import requests
+import shutil
+
 from ih.chart import chart as ih_chart
 import imgkit
 from emojificate.filter import emojificate
@@ -68,11 +71,29 @@ def designit(data):
         text = " ".join(res)
                 
 
-    if emoji in ["🌊"]:
-        emoji = "💧"
-
     font = ImageFont.truetype("Minecraft.ttf", 32, encoding="unic")
-    efont = ImageFont.truetype("og-dcm-emoji.ttf", 64, encoding="unic")
+    #efont = ImageFont.truetype("og-dcm-emoji.ttf", 64, encoding="unic")
+    #efont = ImageFont.truetype("Twemoji.ttf", 64, encoding="unic")
+
+    c = emoji[0]
+    e = str(c.encode("unicode_escape")).lower().split("u")[1].strip("'").strip("0")
+    url = "https://abs.twimg.com/emoji/v2/72x72/%s.png" % e
+
+    print(url)
+    r = requests.get(url, stream=True)
+    if r.status_code == 200:
+        with open("emoji.png", 'wb') as f:
+            r.raw.decode_content = True
+            shutil.copyfileobj(r.raw, f)
+    else:
+        raise ValueError("Image not found at %s" % url)
+
+    # Transparency hacks
+    epng = Image.open("emoji.png").convert("RGBA")
+    alpha = epng.convert('RGBA').split()[-1]
+    bg = Image.new("RGBA", epng.size, (255,255,255,255))
+    bg.paste(epng, mask=alpha)
+    epng = bg
 
     tmpimage = Image.new("RGB", (1000, 500))
     d = ImageDraw.Draw(tmpimage)
@@ -87,8 +108,9 @@ def designit(data):
 
     d.multiline_text(((W-tw)/2,(H - th - 30)), text, font=font, align="center", fill=(0,0,0))
     # emoji
-    ew, eh = d.textsize(emoji, font=efont)
-    d.text(((W-ew)/2, 40), emoji, font=efont, fill=(0,0,0))
+    image.paste(epng, (int((W-epng.width)/2), 40)) 
+#    ew, eh = d.textsize(emoji, font=efont)
+#    d.text(((W-ew)/2, 40), emoji, font=efont, fill=(0,0,0))
 
     # borders
     index = 1

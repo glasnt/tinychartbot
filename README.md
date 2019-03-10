@@ -6,9 +6,8 @@ A bot that takes tweets from [@tinycarebot](https://twitter.com/tinycarebot) and
 
  * More borders
  * More font options
- * More emoji fallbacks
 
 ## Credits
 
 Jonny for [the bot](https://twitter.com/tinycarebot)
-Monica for [the emoji font](https://meowni.ca/posts/og-emoji-font/)
+Twitter for [twemoji](https://github.com/twitter/twemoji)
