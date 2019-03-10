@@ -4,8 +4,8 @@ A bot that takes tweets from [@tinycarebot](https://twitter.com/tinycarebot) and
 
 ## TODO
 
- * Better borders
- * More centered text
+ * More borders
+ * More font options
  * More emoji fallbacks
 
 ## Credits

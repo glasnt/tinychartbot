@@ -20,7 +20,7 @@ def main():
     
     design.save(design_img)
 
-    pattern = ih_chart(design_img, palette_name="wool", scale=2, colours=16, render=False, save=False)
+    pattern = ih_chart(design_img, palette_name="wool", scale=2, colours=8, render=False, save=False)
 
     with open(chart_html, 'w') as f:
         f.write(pattern)
@@ -60,36 +60,39 @@ def designit(data):
         res = []
         for x in text.split(" "):
             cul += len(x)
-            print(x, cul)
             if cul <= line_length:
                 res.append(x)
             else:
                 res.append("\n%s" % x)
                 cul = 0
-            print(res)
         text = " ".join(res)
                 
 
     if emoji in ["🌊"]:
         emoji = "💧"
 
-    W, H = (400, 200)
-
     font = ImageFont.truetype("Minecraft.ttf", 32, encoding="unic")
     efont = ImageFont.truetype("og-dcm-emoji.ttf", 64, encoding="unic")
 
-    image = Image.new("RGB", (W, H), color=(255,255,255))
+    tmpimage = Image.new("RGB", (1000, 500))
+    d = ImageDraw.Draw(tmpimage)
+    tw, th = d.textsize(text, font=font)
 
+    H = th + 160
+    W = tw + (tw % 20) + 60
+
+    image = Image.new("RGB", (W, H), color=(255, 255, 255))
     d = ImageDraw.Draw(image)
+    tw, th = d.textsize(text, font=font)
 
+    d.multiline_text(((W-tw)/2,(H - th - 30)), text, font=font, align="center", fill=(0,0,0))
     # emoji
-    d.text((W/2 - 30, 40), emoji, font=efont, fill=(0,0,0))
+    ew, eh = d.textsize(emoji, font=efont)
+    d.text(((W-ew)/2, 40), emoji, font=efont, fill=(0,0,0))
 
-    # font
-    d.multiline_text((20, H/2 + 20), text, font=font, align="center", fill=(0,0,0))
-
-    # border
-    border = Image.open("borders/border1.png")
+    # borders
+    index = 1
+    border = Image.open("borders/%d_border.png" % index)
     for x in range(0, H, border.height):
         image.paste(border, (0, x))
         image.paste(border, (W - border.width, x))
@@ -98,6 +101,15 @@ def designit(data):
     for x in range(0, W, border.width):
         image.paste(border, (x, 0))
         image.paste(border, (x, H - border.height))
+
+    corner = Image.open("borders/%d_corner.png" % index)
+    image.paste(corner, (0, 0))
+    corner = corner.transpose(Image.ROTATE_90)
+    image.paste(corner, (0, H-corner.height))
+    corner = corner.transpose(Image.ROTATE_90)
+    image.paste(corner, (W-corner.width, H-corner.height))
+    corner = corner.transpose(Image.ROTATE_90)
+    image.paste(corner, (W-corner.width, 0))
 
     
     return image
