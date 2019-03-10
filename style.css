@@ -1,0 +1,27 @@
+.border {
+  width: 400px;
+  text-align: center;
+  border: 15px solid transparent;
+  padding: 15px;
+  border-image-source: url(border.png);
+  border-image-repeat: round;
+  border-image-slice: 30;
+}
+
+.emoji { 
+
+} 
+
+@font-face { 
+  font-family: "stitch";
+  src: url("Minecraft.ttf") format("truetype");
+}
+
+.text {  
+  padding: 10px; 
+  font-size: 16pt; 
+  font-family: 'stitch';
+  font-smooth: never;
+  -webkit-font-smoothing : none;
+}
+
