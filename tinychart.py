@@ -23,7 +23,7 @@ def main():
     
     design.save(design_img)
 
-    pattern = ih_chart(design_img, palette_name="wool", scale=2, colours=8, render=False, save=False)
+    pattern = ih_chart(design_img, palette_name="wool", scale=2, colours=32, render=False, save=False)
 
     with open(chart_html, 'w') as f:
         f.write(pattern)
@@ -57,11 +57,13 @@ def get_latest_tweet(api, SCREEN_NAME):
 def designit(data):
     emoji, text = data
     
-    line_length = 18
+    line_length = 12
     if len(text) > line_length:
         cul = 0
         res = []
         for x in text.split(" "):
+            if x == "": 
+                continue
             cul += len(x)
             if cul <= line_length:
                 res.append(x)
@@ -79,7 +81,6 @@ def designit(data):
     e = str(c.encode("unicode_escape")).lower().split("u")[1].strip("'").strip("0")
     url = "https://abs.twimg.com/emoji/v2/72x72/%s.png" % e
 
-    print(url)
     r = requests.get(url, stream=True)
     if r.status_code == 200:
         with open("emoji.png", 'wb') as f:
