@@ -3,26 +3,22 @@ import imgkit
 from emojificate.filter import emojificate
 import twitter
 from placeholder_secrets import SECRETS
-
-#tinycare = "https://twitter.com/tinycarebot/status/1104476321978171392"
+from manual import designit
+from PIL import Image, ImageDraw, ImageFont
 
 SCREEN_NAME = "tinycarebot"
+ 
 def main():
     api = connect(SECRETS)
     latest = get_latest_tweet(api, SCREEN_NAME)
     text = latest.text.split(":")
-    chart = chartit(text)
+    design = designit(text)
 
-    design_html = "design.html"
     design_img = "design.png"
     chart_html = "chart.html"
     chart_img = "chart.png"
-
-    with open(design_html, 'w') as f:
-        f.write(chart)
-
-    options = {"crop-w": 460, "quiet": ""}
-    imgkit.from_file(design_html, design_img, options=options)
+    
+    design.save(design_img)
 
     pattern = ih_chart(design_img, palette_name="wool", scale=2, colours=16, render=False, save=False)
 
@@ -54,18 +50,70 @@ def get_latest_tweet(api, SCREEN_NAME):
         sys.exit(1)
     return latest
 
-def chartit(data):
-    emoji, text = data
 
-    emoji = emojificate(emoji)
-    html = """
-        <link rel='stylesheet' href='style.css'>
-        <div class='border'>
-            <div class='emoji'>%s</div>
-            <div class='text'>%s</div>
-        </div>
-        """ % (emoji, text)
-    return html
+def designit(data):
+    emoji, text = data
+    
+    line_length = 18
+    if len(text) > line_length:
+        cul = 0
+        res = []
+        for x in text.split(" "):
+            cul += len(x)
+            print(x, cul)
+            if cul <= line_length:
+                res.append(x)
+            else:
+                res.append("\n%s" % x)
+                cul = 0
+            print(res)
+        text = " ".join(res)
+                
+
+    if emoji in ["🌊"]:
+        emoji = "💧"
+
+    W, H = (400, 200)
+
+    font = ImageFont.truetype("Minecraft.ttf", 32, encoding="unic")
+    efont = ImageFont.truetype("og-dcm-emoji.ttf", 64, encoding="unic")
+
+    image = Image.new("RGB", (W, H), color=(255,255,255))
+
+    d = ImageDraw.Draw(image)
+
+    # emoji
+    d.text((W/2 - 30, 40), emoji, font=efont, fill=(0,0,0))
+
+    # font
+    d.multiline_text((20, H/2 + 20), text, font=font, align="center", fill=(0,0,0))
+
+    # border
+    border = Image.open("borders/border1.png")
+    for x in range(0, H, border.height):
+        image.paste(border, (0, x))
+        image.paste(border, (W - border.width, x))
+
+    border = border.transpose(Image.ROTATE_90)
+    for x in range(0, W, border.width):
+        image.paste(border, (x, 0))
+        image.paste(border, (x, H - border.height))
+
+    
+    return image
+
+#def designit(data):
+#    emoji, text = data
+#
+#    emoji = emojificate(emoji)
+#    html = """
+#        <link rel='stylesheet' href='style.css'>
+#        <div class='border'>
+#            <div class='emoji'>%s</div>
+#            <div class='text'>%s</div>
+#        </div>
+#        """ % (emoji, text)
+#    return html
 
 if __name__ == "__main__":
     main()
