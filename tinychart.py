@@ -1,5 +1,8 @@
 import requests
 import shutil
+from pathlib import Path
+import random
+import os
 
 from ih.chart import chart as ih_chart
 import imgkit
@@ -28,7 +31,15 @@ def main():
         f.write(pattern)
 
     imgkit.from_file(chart_html, chart_img, options={"quiet": ""})
+    
+    # Hack - reduce the filesize of the generated image considerably by
+    # running it through imagemagick
+    os.system("convert %s %s" % (chart_img, chart_img))
+
     print("Result: %s" % chart_img)
+
+    tweet = "Cross-stitch Sampler: \"%s\"\n\nhttps://twitter.com/tinycarebot/statuses/%s" % (latest.text, latest.id) 
+    api.PostUpdate(tweet, in_reply_to_status_id=latest.id, media=chart_img)
 
 def connect(s):
     api = twitter.Api(
@@ -72,9 +83,8 @@ def designit(data):
         text = " ".join(res)
                 
 
+    # Minecraft 32pt at ih-Scale 2 makes for pixel perfect text
     font = ImageFont.truetype("Minecraft.ttf", 32, encoding="unic")
-    #efont = ImageFont.truetype("og-dcm-emoji.ttf", 64, encoding="unic")
-    #efont = ImageFont.truetype("Twemoji.ttf", 64, encoding="unic")
 
     c = emoji[0]
     e = str(c.encode("unicode_escape")).lower().split("u")[1].strip("'").strip("0")
@@ -99,14 +109,12 @@ def designit(data):
     d = ImageDraw.Draw(tmpimage)
     tw, th = d.textsize(text, font=font)
 
-    index = 2 # TODO randomize
-    border = Image.open("borders/%d_border.png" % index)
+    border, corner = get_random_border()
 
     H = th + 160 
     H = H + (H % border.height) 
     W = tw + (tw % 20) + 60 + 2
     W = W + (W % border.width)
-    print(H, W)
 
     image = Image.new("RGB", (W, H), color=(255, 255, 255))
     d = ImageDraw.Draw(image)
@@ -123,9 +131,6 @@ def designit(data):
 #    ew, eh = d.textsize(emoji, font=efont)
 #    d.text(((W-ew)/2, 40), emoji, font=efont, fill=(0,0,0))
 
-    # borders
-
-
     for x in range(0, H, border.height):
         image.paste(border, (0, x))
         image.paste(border, (W - border.width, x))
@@ -135,7 +140,6 @@ def designit(data):
         image.paste(border, (x, 0))
         image.paste(border, (x, H - border.height))
 
-    corner = Image.open("borders/%d_corner.png" % index)
     image.paste(corner, (0, 0))
     corner = corner.transpose(Image.ROTATE_90)
     image.paste(corner, (0, H-corner.height))
@@ -146,5 +150,19 @@ def designit(data):
 
     return image
 
+def get_random_border():
+    BORDER_DIR = "borders/"
+    
+    # Assume there's always 2 files per border type, and that they match
+    # Then, randomly pick one. 
+    # if this breaks, blame Katie.
+    length = sum(1 for _ in Path(BORDER_DIR).iterdir()) / 2
+    index = random.randint(1, length)
+
+
+    border = Image.open("%s/%s_border.png" % (BORDER_DIR, index))
+    corner = Image.open("%s/%s_corner.png" % (BORDER_DIR, index))
+
+    return (border, corner)
 if __name__ == "__main__":
     main()
