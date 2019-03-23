@@ -22,7 +22,7 @@ def main():
     
     design.save(design_img)
 
-    pattern = ih_chart(design_img, palette_name="wool", scale=2, colours=32, render=False, save=False)
+    pattern = ih_chart(design_img, palette_name="wool", scale=2, colours=16, render=False, save=False)
 
     with open(chart_html, 'w') as f:
         f.write(pattern)
@@ -56,7 +56,7 @@ def get_latest_tweet(api, SCREEN_NAME):
 def designit(data):
     emoji, text = data
     
-    line_length = 12
+    line_length = 10
     if len(text) > line_length:
         cul = 0
         res = []
@@ -99,22 +99,33 @@ def designit(data):
     d = ImageDraw.Draw(tmpimage)
     tw, th = d.textsize(text, font=font)
 
-    H = th + 160
-    W = tw + (tw % 20) + 60
+    index = 2 # TODO randomize
+    border = Image.open("borders/%d_border.png" % index)
+
+    H = th + 160 
+    H = H + (H % border.height) 
+    W = tw + (tw % 20) + 60 + 2
+    W = W + (W % border.width)
+    print(H, W)
 
     image = Image.new("RGB", (W, H), color=(255, 255, 255))
     d = ImageDraw.Draw(image)
     tw, th = d.textsize(text, font=font)
 
-    d.multiline_text(((W-tw)/2,(H - th - 30)), text, font=font, align="center", fill=(0,0,0))
+
+    lefttext = (W-tw) / 2
+    lefttext = (lefttext % 2) + lefttext
+
+    d.multiline_text((lefttext,(H - th - 30)), text, font=font, align="center", fill=(0,0,0))
+
     # emoji
     image.paste(epng, (int((W-epng.width)/2), 40)) 
 #    ew, eh = d.textsize(emoji, font=efont)
 #    d.text(((W-ew)/2, 40), emoji, font=efont, fill=(0,0,0))
 
     # borders
-    index = 1
-    border = Image.open("borders/%d_border.png" % index)
+
+
     for x in range(0, H, border.height):
         image.paste(border, (0, x))
         image.paste(border, (W - border.width, x))
@@ -133,21 +144,7 @@ def designit(data):
     corner = corner.transpose(Image.ROTATE_90)
     image.paste(corner, (W-corner.width, 0))
 
-    
     return image
-
-#def designit(data):
-#    emoji, text = data
-#
-#    emoji = emojificate(emoji)
-#    html = """
-#        <link rel='stylesheet' href='style.css'>
-#        <div class='border'>
-#            <div class='emoji'>%s</div>
-#            <div class='text'>%s</div>
-#        </div>
-#        """ % (emoji, text)
-#    return html
 
 if __name__ == "__main__":
     main()

@@ -1,4 +1,4 @@
 python-twitter
 requests
-ih==0.0.0dev7
+ih
 imgkit
