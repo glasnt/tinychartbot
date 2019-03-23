@@ -3,7 +3,6 @@ import shutil
 
 from ih.chart import chart as ih_chart
 import imgkit
-from emojificate.filter import emojificate
 import twitter
 from placeholder_secrets import SECRETS
 from manual import designit
