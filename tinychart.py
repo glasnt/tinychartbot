@@ -8,7 +8,6 @@ from ih.chart import chart as ih_chart
 import imgkit
 import twitter
 from placeholder_secrets import SECRETS
-from manual import designit
 from PIL import Image, ImageDraw, ImageFont
 
 SCREEN_NAME = "tinycarebot"
